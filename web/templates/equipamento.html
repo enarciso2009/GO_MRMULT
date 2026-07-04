@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
+   
+    <title>Gerenciamento de Equipamentos</title>
+    <style>
+        body { background-color: #f5f5f5; color: #000; font-family: Arial, sans-serif; }
+        .navbar { background-color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .navbar .nav-link, .navbar .navbar-brand { color: #000; }
+        .card { border: 1px solid #000; border-radius: 1rem; padding: 2rem; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h1, h4 { font-weight: 600; color: #000; }
+        .form-control { border: 1px solid #000; color: #000; background-color: #fff; }
+        .btn-clean { background-color: #fff; color: #000; border: 2px solid #000; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; }
+        .btn-clean:hover { background-color: #f0f0f0; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
+        .table { border: 1px solid #000; }
+        .table th { background-color: #f0f0f0; color: #000; border-bottom: 2px solid #000; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-info-subtle" data-bs-theme="light">
+      <div class="container-fluid">
+        <a href="/">
+            <img src="/static/refeicao.png" alt="Logo" width="50" class="me-3 rounded-circle">
+        </a>
+        <span class="navbar-brand fw-bold">Módulo Refeitório</span>
+        <div class="collapse navbar-collapse" id="navbarColor01">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link fw-semibold" href="/">Home/Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link fw-semibold active" href="/equipamento">Equipamentos</a></li>
+          </ul>
+          <a href="/logout" class="btn btn-sm btn-outline-dark">Sair</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row g-4">
+            
+            <!-- COLUNA DA ESQUERDA: FORMULÁRIO DE CADASTRO -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <h4 class="mb-4 text-center">Novo Equipamento</h4>
+                    
+                    <!-- Exibe mensagem de erro caso aconteça algo no Go -->
+                    {{if .IsErro}}
+                    <div class="alert alert-danger border-1 text-center small mb-3" style="border-color: #000;">
+                        ⚠️ {{.Mensagem}}
+                    </div>
+                    {{end}}
+
+                    <form action="/equipamento" method="POST" id="formEquipamento">
+                        <!-- Campo escondido que avisa o Go qual botão foi clicado (incluir/alterar) -->
+                        <input type="hidden" name="acao" id="campoAcao" value="incluir">
+                        <input type="hidden" name="id_equip" id="campoIdEquip" value="">
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nome do Equipamento</label>
+                            <input class="form-control" required type="text" name="nome" id="inputNome" placeholder="Ex: Catraca Portaria">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Endereço IP</label>
+                            <input class="form-control" required type="text" name="ip" id="inputIP" placeholder="Ex: 192.168.1.50">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Máscara de Rede</label>
+                            <input class="form-control" required type="text" name="mask" id="inputMask" placeholder="Ex: 255.255.255.0">
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" id="btnSalvar" class="btn btn-clean w-100 py-2">Salvar</button>
+                            <button type="button" id="btnCancelar" class="btn btn-outline-secondary w-100 py-2 d-none" onclick="cancelarEdicao()">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- COLUNA DA DIREITA: TABELA DE EQUIPAMENTOS -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <h4 class="mb-4">Equipamentos Configurados</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>IP</th>
+                                    <th>Máscara</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .Equipamentos}}
+                                <tr>
+                                    <td class="fw-bold">#{{.IDEquip}}</td>
+                                    <!-- Como os campos são ponteiros (*string) no Go, o template do Go lê o valor direto automaticamente -->
+                                    <td class="fw-semibold">{{.Nome}}</td>
+                                    <td><code>{{.IP}}</code></td>
+                                    <td>{{.Mask}}</td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <!-- Botão Alterar: Chama uma função Javascript para preencher o formulário da esquerda -->
+                                            <button class="btn btn-sm btn-outline-dark" 
+                                                    onclick="prepararEdicao('{{.IDEquip}}', '{{.Nome}}', '{{.IP}}', '{{.Mask}}')">
+                                                Editar
+                                            </button>
+                                            
+                                            <!-- Formulário invisível individual para disparar a exclusão via POST igual à lógica do seu Django -->
+                                            <form action="/equipamento" method="POST" onsubmit="return confirm('Deseja realmente excluir este equipamento?')">
+                                                <input type="hidden" name="acao" value="excluir">
+                                                <input type="hidden" name="id_equip" value="{{.IDEquip}}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{else}}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">Nenhum equipamento cadastrado para esta empresa.</td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript para manipular o estado da tela (Inclusão vs Alteração) -->
+    <script>
+        function prepararEdicao(id, nome, ip, mask) {
+            document.getElementById('campoAcao').value = 'alterar';
+            document.getElementById('campoIdEquip').value = id;
+            document.getElementById('inputNome').value = nome;
+            document.getElementById('inputIP').value = ip;
+            document.getElementById('inputMask').value = mask;
+            
+            document.getElementById('btnSalvar').innerText = 'Atualizar';
+            document.getElementById('btnCancelar').classList.remove('d-none');
+            document.getElementById('inputNome').focus();
+        }
+
+        function cancelarEdicao() {
+            document.getElementById('formEquipamento').reset();
+            document.getElementById('campoAcao').value = 'incluir';
+            document.getElementById('campoIdEquip').value = '';
+            
+            document.getElementById('btnSalvar').innerText = 'Salvar';
+            document.getElementById('btnCancelar').classList.add('d-none');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/myconf.css">
+    <link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
+    <title>Módulo Refeitório</title>
+    <style>
+        body { background-color: #fff; color: #000; font-family: Arial, sans-serif; }
+        .navbar { background-color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .navbar .nav-link, .navbar .navbar-brand { color: #000; }
+        .navbar .nav-link:hover, .navbar .dropdown-item:hover { background-color: #f0f0f0; }
+        .card { border: 1px solid #000; border-radius: 1rem; padding: 2rem; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h1 { font-weight: 600; color: #000; }
+        .form-control { border: 1px solid #000; color: #000; background-color: #fff; }
+        .btn-clean { background-color: #fff; color: #000; border: 2px solid #000; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; }
+        .btn-clean:hover { background-color: #f0f0f0; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-info-subtle">
+        <div class="container-fluid d-flex align-items-center justify-content-center">
+            <img src="/static/refeicao.png" alt="Logo" width="50" class="me-3 rounded-circle">
+            <h1 class="mb-0 fs-3">Módulo Refeitório Multi Empresas</h1>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="card mx-auto" style="max-width: 500px;">
+            <h1 class="text-center mb-4">Login</h1>
+
+            <!-- Bloco do Go para mensagens de erro -->
+            {{if .}}
+            <div class="alert alert-danger border-1 text-center fw-semibold small mb-4" role="alert" style="border-color: #000;">
+                ⚠️ {{.}}
+            </div>
+            {{end}}
+
+            <form action="/login" method="POST">
+                <div class="mb-3">
+                    <input class="form-control form-control-lg fs-6" required type="text" name="username" id="username" placeholder="Usuário">
+                </div>
+                <div class="mb-3">
+                    <input class="form-control form-control-lg fs-6" required type="password" name="password" id="password" placeholder="Senha">
+                </div>
+
+                <div class="text-center mt-4">
+                    <input type="submit" value="Login" class="btn btn-clean px-5 py-2">
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

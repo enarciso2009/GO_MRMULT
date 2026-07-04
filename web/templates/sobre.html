@@ -1,0 +1,104 @@
+<!-- web/templates/sobre.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
+   
+    <title>Sobre o Sistema</title>
+    <style>
+        body { background-color: #f5f5f5; color: #000; font-family: Arial, sans-serif; }
+        .navbar { background-color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .navbar .nav-link, .navbar .navbar-brand { color: #000; }
+        .card { border: 1px solid #000; border-radius: 1rem; padding: 2rem; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h1, h4, h5 { font-weight: 600; color: #000; }
+        .btn-clean { background-color: #fff; color: #000; border: 2px solid #000; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-clean:hover { background-color: #f0f0f0; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); color: #000; }
+        .table { border: 1px solid #000; }
+        .table th { background-color: #f0f0f0; color: #000; border-bottom: 2px solid #000; }
+        .list-group-item { background-color: transparent; border-bottom: 1px solid #eee; padding-left: 0; padding-right: 0; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-info-subtle" data-bs-theme="light">
+      <div class="container-fluid">
+        <a href="/">
+            <img src="/static/refeicao.png" alt="Logo" width="50" class="me-3 rounded-circle">
+        </a>
+        <span class="navbar-brand fw-bold">Módulo Refeitório</span>
+        <div class="collapse navbar-collapse" id="navbarColor01">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link fw-semibold" href="/">Home/Dashboard</a></li>
+            <!--<li class="nav-item"><a class="nav-link fw-semibold" href="/equipamento">Equipamentos</a></li> -->
+            <li class="nav-item"><a class="nav-link fw-semibold active" href="/sobre">Sobre</a></li>
+          </ul>
+          <a href="/logout" class="btn btn-sm btn-outline-dark">Sair</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <h4 class="mb-4">Informações do Sistema</h4>
+                    
+                    <p class="lead mb-4">
+                        <p class="lead mb-4" style="line-height: 1.7; color: #222;">
+                            O <strong>MRMULT</strong> é uma solução de engenharia de software desenvolvida para centralizar, monitorar e automatizar o controle de acesso e consumo de refeições em alta escala. Operando sob o modelo <strong>SaaS Multiempresa</strong>, a plataforma entrega isolamento seguro de dados, alta disponibilidade e governança operacional para múltiplos clientes corporativos em uma infraestrutura unificada.</p>
+
+                    </p>
+                    
+                    <hr class="my-4" style="border-top: 1px solid #000;">
+
+                    <h5 class="mb-3">Especificações Técnicas</h5>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%;">Componente</th>
+                                    <th>Detalhes da Configuração</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-semibold">Versão do Aplicativo</td>
+                                    <td><code class="fs-6 text-dark fw-bold">v1.0.0</code></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold">Tecnologia Base</td>
+                                    <td>Go (Golang Moderno)</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold">Banco de Dados</td>
+                                    <td>PostgreSQL</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold">Interface Visual</td>
+                                    <td>Bootstrap CSS JavaScript (Tema Clean)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h5 class="mt-4 mb-2">Todos os direitos reservados</h5>
+                    <p class="text-muted mb-4">Este aplicativo e sua interface de usuário são protegidos
+                        por marcas registradas e outros direitos de propriedade intelectual
+                        no Brasil e em outros países. A reprodução ou distribuição não
+                        autorizada deste programa, ou de qualquer parte dele, pode resultar
+                        em severas penalidades civis e criminais e será processada na máxima
+                        extensão possível nos termos da lei. &copy; 2026.</p>
+
+                    <div class="d-flex gap-2" style="max-width: 200px;">
+                        <a href="/" class="btn btn-clean w-100 py-2">Voltar ao Início</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
