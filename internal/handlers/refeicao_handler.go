@@ -1,128 +1,147 @@
 package handlers
 
 import (
-	"fmt"
 	"html/template"
 	"mrmult/internal/models"
 	"mrmult/internal/services"
 	"net/http"
+	"strconv"
 	"time"
 )
 
+// Carrega o HTML apenas uma vez na inicializacao do sistema para alta performance
 var tmplRefeicao = template.Must(template.ParseFiles("web/templates/refeicao.html"))
+
+// Tabela Refeicao Data define o formato de dados que a tela Html espera receber
+type TelaRefeicaoData struct {
+	Refeicoes []models.Refeicao
+	IsErro    bool
+	Mensagem  string
+}
 
 type RefeicaoHandler struct {
 	service *services.RefeicaoService
 }
 
-func NewRefeicaoHandler() *RefeicaoHandler {
-	return &RefeicaoHandler{
-		service: services.NewRefeicaoService(),
-	}
+// NewRefeicaoHandler cria a instancia do controlador injetando o service de banco
+func NewRefeicaoHandler(service *services.RefeicaoService) *RefeicaoHandler {
+	return &RefeicaoHandler{service: service}
 }
 
-type DadosTelaRefeicao struct {
-	Refeicoes []models.Refeicao
-	Mensagem  string
-	IsErro    bool
-}
-
+// GerenciarRefeicao centraliza as operacoes de exibicao e processamento da tela
 func (h *RefeicaoHandler) GerenciarRefeicao(w http.ResponseWriter, r *http.Request) {
-	var empresaLogadaID uint = 1 // Vinculado a empresa padrão do admin
+	// IMPORTANTE: Defina o id da empresa padrao para o ecossistema SaaS Multiempresa
+	var empresaPadraoID uint = 1
 
+	// =============================================
+	// OPERACAO 1: PROCESSAMENTO DE ENVIO (POST)
+	// =============================================
 	if r.Method == http.MethodPost {
 		acao := r.FormValue("acao")
-		nomeInput := r.FormValue("nome")
-
-		var valorInput float64
-		fmt.Sscanf(r.FormValue("valor"), "%f", &valorInput)
-		// Capture as strings de data vindas do HTML (formato padrão "AAAA-MM-DD")
-
+		idRefStr := r.FormValue("id_ref")
+		nome := r.FormValue("nome")
+		valorStr := r.FormValue("valor")
+		dataInicioStr := r.FormValue("data_inicio")
 		horaInicio := r.FormValue("hora_inicio")
 		horaFim := r.FormValue("hora_fim")
 
-		// Crie o layout que ensina o Go a ler esse formato de data
-		layoutData := "2006-01-02"
-
-		// Converte data inicio obrigatorio
-		dInicio, err1 := time.Parse(layoutData, r.FormValue("data_inicio"))
-		var ponteiroDataInicio *time.Time
-		if err1 == nil {
-			ponteiroDataInicio = &dInicio
+		// Ajuste de horas para HH:MM:SS
+		if len(horaInicio) == 5 {
+			horaInicio = horaInicio + ":00"
+		}
+		if len(horaFim) == 5 {
+			horaFim = horaFim + ":00"
 		}
 
-		//Converte a data de fim (Opcional)
-		dataFimStr := r.FormValue("data_fim")
-		var ponteiroDataFim *time.Time
-		// Só tentar converter se realmente o usuario escolheu uma data na tela
-		if dataFimStr != "" {
-			dFim, err2 := time.Parse(layoutData, dataFimStr)
-			if err2 == nil {
-				ponteiroDataFim = &dFim
-			}
+		// Converter o valor financeiro para float64
+		valor, _ := strconv.ParseFloat(valorStr, 64)
+
+		// Converter a string de data (AAAA-MM-DD) vinda do HTML para time.Time do Go
+		var dataInicio time.Time
+		if dataInicioStr != "" {
+			dataInicio, _ = time.Parse("2006-01-02", dataInicioStr)
+		} else {
+			dataInicio = time.Now() // Fallback de seguranca
 		}
 
-		// Se dataFimStr for vazia o ponteiroDataFim continuará sendo 'nil'.
-		// Fazendo o GORM gravar como null perfeitamente no banco de dados!
-
+		// ACAO: INCLUIR NOVA REFEICAO
 		if acao == "incluir" {
 			novaRef := models.Refeicao{
-				Nome:       nomeInput,
-				Valor:      valorInput,
-				DataInicio: ponteiroDataInicio,
-				DataFim:    ponteiroDataFim,
+				Nome:       nome,
 				HoraInicio: &horaInicio,
 				HoraFim:    &horaFim,
-				EmpresaID:  &empresaLogadaID,
+				EmpresaID:  &empresaPadraoID,
 			}
-			if err := h.service.Incluir(&novaRef); err != nil {
-				h.renderizarComErro(w, "Erro ao incluir refeição: "+err.Error(), &empresaLogadaID)
+
+			err := h.service.Incluir(&novaRef, valor, dataInicio)
+			if err != nil {
+				h.renderizarComErro(w, &empresaPadraoID, "Erro ao incluir refeicao: "+err.Error())
 				return
 			}
 		}
 
+		// ACAO: ALTERAR REFEICAO EXISTENTE (HISTORICO)
 		if acao == "alterar" {
-			var idRef uint
-			fmt.Sscanf(r.FormValue("id_ref"), "%d", &idRef)
+			idRefUint, _ := strconv.ParseUint(idRefStr, 10, 32)
+			idRef := uint(idRefUint)
 
-			refEditada := models.Refeicao{
+			refAlterado := models.Refeicao{
 				IDRef:      idRef,
-				Nome:       nomeInput,
-				Valor:      valorInput,
-				DataInicio: ponteiroDataInicio,
-				DataFim:    ponteiroDataFim,
+				Nome:       nome,
 				HoraInicio: &horaInicio,
 				HoraFim:    &horaFim,
+				EmpresaID:  &empresaPadraoID,
 			}
-			if err := h.service.Alterar(&refEditada, &empresaLogadaID); err != nil {
-				h.renderizarComErro(w, "Erro ao alterar refeição: "+err.Error(), &empresaLogadaID)
+
+			err := h.service.Alterar(&refAlterado, valor, dataInicio, &empresaPadraoID)
+			if err != nil {
+				h.renderizarComErro(w, &empresaPadraoID, "Erro ao alterar refeicao: "+err.Error())
 				return
 			}
 		}
 
+		// ACAO: EXCLUIR REFEICAO
 		if acao == "excluir" {
-			var idRef uint
-			fmt.Sscanf(r.FormValue("id_ref"), "%d", &idRef)
-			if err := h.service.Excluir(idRef, &empresaLogadaID); err != nil {
-				h.renderizarComErro(w, "Erro ao excluir refeição: "+err.Error(), &empresaLogadaID)
+			idRefUint, _ := strconv.ParseUint(idRefStr, 10, 32)
+			idRef := uint(idRefUint)
+
+			err := h.service.Excluir(&idRef, &empresaPadraoID)
+			if err != nil {
+				h.renderizarComErro(w, &empresaPadraoID, "Erro ao excluir refeicao: "+err.Error())
 				return
 			}
 		}
 
+		// Apos qualquer operacao com sucesso, redireciona via GET para limpar o formulario e evitar reenvio (PRG pattern)
 		http.Redirect(w, r, "/refeicao", http.StatusSeeOther)
 		return
 	}
 
-	lista, err := h.service.Listar(&empresaLogadaID)
-	if err != nil {
-		http.Error(w, "Erro ao buscar refeições", http.StatusInternalServerError)
-		return
+	// ===============================================
+	// OPERACAO 2: RENDERIZACAO LIMPA DA TELA GET
+	// ===============================================
+
+	lista, err := h.service.Listar(&empresaPadraoID)
+	data := TelaRefeicaoData{
+		Refeicoes: lista,
 	}
 
-	tmplRefeicao.Execute(w, DadosTelaRefeicao{Refeicoes: lista})
+	if err != nil {
+		data.IsErro = true
+		data.Mensagem = "Erro ao listar refeicoes do banco: " + err.Error()
+	}
+
+	tmplRefeicao.Execute(w, data)
+
 }
 
-func (h *RefeicaoHandler) renderizarComErro(w http.ResponseWriter, msg string, empID *uint) {
-	lista, _ := h.service.Listar(empID)
-	tmplRefeicao.Execute(w, DadosTelaRefeicao{Refeicoes: lista, Mensagem: msg, IsErro: true})
+// Funcao auxiliar interna para renderizar a tela exibindo os alertas de erro na interface
+func (h *RefeicaoHandler) renderizarComErro(w http.ResponseWriter, EmpresaID *uint, msg string) {
+	lista, _ := h.service.Listar(EmpresaID)
+	data := TelaRefeicaoData{
+		Refeicoes: lista,
+		IsErro:    true,
+		Mensagem:  msg,
+	}
+	tmplRefeicao.Execute(w, data)
 }

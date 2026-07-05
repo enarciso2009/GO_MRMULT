@@ -1,3 +1,4 @@
+<!-- web/templates/refeicao.html -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -43,7 +44,7 @@
             <!-- COLUNA DA ESQUERDA: FORMULÁRIO DE CADASTRO -->
             <div class="col-lg-4">
                 <div class="card">
-                    <h4 class="mb-4 text-center">Nova Refeição</h4>
+                    <h4 class="mb-4 text-center" id="tituloFormulario">Nova Refeição</h4>
                     
                     {{if .IsErro}}
                     <div class="alert alert-danger border-1 text-center small mb-3" style="border-color: #000;">
@@ -52,6 +53,7 @@
                     {{end}}
 
                     <form action="/refeicao" method="POST" id="formRefeicao">
+                        <!-- Identificadores escondidos para controle de estado no Go -->
                         <input type="hidden" name="acao" id="campoAcao" value="incluir">
                         <input type="hidden" name="id_ref" id="campoIdRef" value="">
 
@@ -66,10 +68,6 @@
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Data de Início da Vigência</label>
                             <input class="form-control" required type="date" name="data_inicio" id="inputDataInicio">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Data de Fim da Vigência</label>
-                            <input class="form-control" type="date" name="data_fim" id="inputDataFim">
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Horário de Início</label>
@@ -99,10 +97,9 @@
                                     <th>ID</th>
                                     <th>Nome</th>
                                     <th>Valor</th>
-                                    <th>Data Vigência</th>
-                                    <th>Horário</th>
+                                    <th>Vigência</th>
+                                    <th>Horário Escutado</th>
                                     <th class="text-end">Ações</th>
-                                    
                                 </tr>
                             </thead>
                             <tbody>
@@ -110,23 +107,25 @@
                                 <tr>
                                     <td class="fw-bold">#{{.IDRef}}</td>
                                     <td class="fw-semibold">{{.Nome}}</td>
-                                    <td>R$ {{printf "%.2f" .Valor}}</td>
+                                    <!-- Exibe o valor comercial dinâmico da tabela filha -->
+                                    <td>R$ {{printf "%.2f" .ObterPrecoAtual}}</td>
+                                    <!-- Exibe o início da vigência formatado por método -->
                                     <td>
-                                        {{if .DataInicio}}{{.DataInicio.Format "02/01/2006"}}{{end}} até
-                                        {{if .DataFim}}
-                                            {{.DataFim.Format "02/01/2006"}}
-                                        {{else}}
-                                            <span class="badge bg-success opacity-75">Em aberto</span>
-                                        {{end}}    
+                                        <span class="badge bg-light text-dark border border-dark">{{.ObterInicioVigencia}}</span>
                                     </td>
-                                    <td><span class="badge bg-secondary opacity-75">{{.HoraInicio}} até {{.HoraFim}}</span></td>
+                                    <!-- Janela operacional da catraca -->
+                                    <td>
+                                        <span class="badge bg-secondary opacity-75">{{if .HoraInicio}}{{.HoraInicio}}{{else}}--:--{{end}} até {{if .HoraFim}}{{.HoraFim}}{{else}}--:--{{end}}</span>
+                                    </td>
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
+                                            <!-- Botão Editar: Atualiza os campos enviando o valor histórico atual -->
                                             <button class="btn btn-sm btn-outline-dark" 
-                                                    onclick="prepararEdicao('{{.IDRef}}', '{{.Nome}}', '{{.Valor}}', '{{.HoraInicio}}', '{{.HoraFim}}')">
+                                                    onclick="prepararEdicao('{{.IDRef}}', '{{.Nome}}', '{{.ObterPrecoAtual}}', '{{if .HoraInicio}}{{.HoraInicio}}{{end}}', '{{if .HoraFim}}{{.HoraFim}}{{end}}')">
                                                 Editar
                                             </button>
                                             
+                                            <!-- Formulário seguro de exclusão em conformidade com as chaves estrangeiras -->
                                             <form action="/refeicao" method="POST" onsubmit="return confirm('Deseja realmente excluir esta refeição?')">
                                                 <input type="hidden" name="acao" value="excluir">
                                                 <input type="hidden" name="id_ref" value="{{.IDRef}}">
@@ -137,7 +136,7 @@
                                 </tr>
                                 {{else}}
                                 <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">Nenhuma refeição cadastrada para esta empresa.</td>
+                                    <td colspan="6" class="text-center py-4 text-muted">Nenhuma refeição cadastrada para esta empresa.</td>
                                 </tr>
                                 {{end}}
                             </tbody>
@@ -149,29 +148,32 @@
         </div>
     </div>
 
+    <!-- JavaScript para manipular o estado operacional da tela -->
     <script>
-        function prepararEdicao(id, nome, valor, horaInicio, horaFim, dataInicio, dataFim) {
+        function prepararEdicao(id, nome, valor, horaInicio, horaFim) {
             document.getElementById('campoAcao').value = 'alterar';
             document.getElementById('campoIdRef').value = id;
             document.getElementById('inputNome').value = nome;
-            document.getElementById('inputDataInicio').value = dataInicio;
-            document.getElementById('inputDataFim').value = dataFim;
-            // Converte o valor string para float legível no input numérico
-            document.getElementById('inputValor').value = parseFloat(valor).toFixed(2);
-            
+            document.getElementById('inputValor').value = valor;
             document.getElementById('inputHoraInicio').value = horaInicio;
             document.getElementById('inputHoraFim').value = horaFim;
             
-            document.getElementById('btnSalvar').innerText = 'Atualizar';
+            // Ajustes visuais do cabeçalho e botão de envio
+            document.getElementById('tituloFormulario').innerText = 'Alterar Preço/Horário';
+            document.getElementById('btnSalvar').innerText = 'Atualizar Valor/Horário';
             document.getElementById('btnCancelar').classList.remove('d-none');
-            document.getElementById('inputNome').focus();
+            
+            // Foco com rolagem suave no formulário da esquerda
+            document.getElementById('formRefeicao').scrollIntoView({ behavior: 'smooth' });
         }
 
         function cancelarEdicao() {
-            document.getElementById('formRefeicao').reset();
             document.getElementById('campoAcao').value = 'incluir';
             document.getElementById('campoIdRef').value = '';
+            document.getElementById('formRefeicao').reset();
             
+            // Restaura o estado visual padrão
+            document.getElementById('tituloFormulario').innerText = 'Nova Refeição';
             document.getElementById('btnSalvar').innerText = 'Salvar';
             document.getElementById('btnCancelar').classList.add('d-none');
         }

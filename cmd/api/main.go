@@ -5,6 +5,7 @@ import (
 	"mrmult/internal/database"
 	"mrmult/internal/handlers"
 	"mrmult/internal/models"
+	"mrmult/internal/services"
 	"net/http"
 )
 
@@ -20,6 +21,7 @@ func main() {
 	err = db.AutoMigrate(
 		&models.Empresa{},
 		&models.Refeicao{},
+		&models.PrecoRefeicao{},
 		&models.GrupoRefeicao{},
 		&models.InterGrupRef{},
 		&models.Funcionario{},
@@ -40,7 +42,8 @@ func main() {
 	homeHandler := handlers.NewHomeHandler()
 	authHandler := handlers.NewAuthHandler()
 	equipamentoHandler := handlers.NewEquipamentoHandler()
-	refeicaoHandler := handlers.NewRefeicaoHandler()
+	refeicaoService := services.NewRefeicaoService()
+	refeicaoHandler := handlers.NewRefeicaoHandler(refeicaoService)
 	sobreHandler := handlers.NewSobreHandler()
 
 	// Rotas

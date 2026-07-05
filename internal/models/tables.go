@@ -25,18 +25,47 @@ type GrupoRefeicao struct {
 // 3. REFEICAO
 
 type Refeicao struct {
-	IDRef      uint       `gorm:"primaryKey;column:id_ref"`
-	Nome       string     `gorm:"type:varchar(100); not null"`
-	Valor      float64    `gorm:"type:numeric(5,2); not null"`
-	DataInicio *time.Time `gorm:"type:date"`
-	DataFim    *time.Time `gorm:"type:date"`
-	HoraInicio *string    `gorm:"type:time;column:hora_inicio"`
-	HoraFim    *string    `gorm:"type:time;column:hora_fim"`
-	EmpresaID  *uint      `gorm:"column:empresa_id"`
-	Empresa    *Empresa   `gorm:"foreignKey:EmpresaID"`
+	IDRef      uint     `gorm:"primaryKey;column:id_ref"`
+	Nome       string   `gorm:"type:varchar(100); not null"`
+	HoraInicio *string  `gorm:"type:time without time zone;column:hora_inicio"`
+	HoraFim    *string  `gorm:"type:time without time zone;column:hora_fim"`
+	EmpresaID  *uint    `gorm:"column:empresa_id"`
+	Empresa    *Empresa `gorm:"foreignKey:EmpresaID"`
+	// Relacionamento com o historico de valores comerciais
+	HistoricoPrecos []PrecoRefeicao `gorm:"foreignKey:RefeicaoID"`
 }
 
-// 4. INTER_GRUP_REF tabela intermediaria do ManyToMany
+// ObterPrecoAtual varre a lista pre-carregada e traz o valor que esta sem data_fim (ativo)
+func (r Refeicao) ObterPrecoAtual() float64 {
+	for _, p := range r.HistoricoPrecos {
+		if p.DataFim == nil {
+			return p.Valor
+		}
+	}
+	return 0.00 // Caso nao encontre nenhumn preco ativo
+}
+
+// ObterInicioVigencia traz a data formatada em padrao brasileiro para a tabela
+func (r Refeicao) ObterInicioVigencia() string {
+	for _, p := range r.HistoricoPrecos {
+		if p.DataFim == nil {
+			return p.DataInicio.Format("02/01/2006")
+		}
+	}
+	return "--/--/----"
+}
+
+// 4. PRECO REFEICAO historico de precos
+
+type PrecoRefeicao struct {
+	IDPreco    uint       `gorm:"primaryKey;column:id_preco"`
+	RefeicaoID uint       `gorm:"column:id_ref;not null"`
+	Valor      float64    `gorm:"type:numeric(5,2); not null"`
+	DataInicio time.Time  `gorm:"type:date;not null;column:data_inicio"`
+	DataFim    *time.Time `gorm:"type:date;column:data_fim"` // NULL = Valor ativo atual
+}
+
+// 5. INTER_GRUP_REF tabela intermediaria do ManyToMany
 
 type InterGrupRef struct {
 	IDInter         uint          `gorm:"primaryKey;column:id_inter"`
@@ -48,7 +77,7 @@ type InterGrupRef struct {
 	Empresa         *Empresa      `gorm:"foreignKey:EmpresaID"`
 }
 
-// 5. FUNCIONARIOS
+// 6. FUNCIONARIOS
 
 type Funcionario struct {
 	ID              uint          `gorm:"primaryKey"`
@@ -68,7 +97,7 @@ type Funcionario struct {
 	Empresa         *Empresa      `gorm:"foreignKey:EmpresaID"`
 }
 
-// 6. VISITANTE
+// 7. VISITANTE
 type Visitante struct {
 	ID              uint          `gorm:"primaryKey"`
 	Matricula       *string       `gorm:"type:varchar(100)"`
@@ -89,7 +118,7 @@ type Visitante struct {
 	Empresa         *Empresa      `gorm:"foreignKey:EmpresaID"`
 }
 
-// 7. TERCEIRO
+// 8. TERCEIRO
 type Terceiro struct {
 	ID              uint          `gorm:"primaryKey"`
 	Matricula       *string       `gorm:"type:varchar(100)"`
@@ -110,7 +139,7 @@ type Terceiro struct {
 	Empresa         *Empresa      `gorm:"foreignKey:EmpresaID"`
 }
 
-// 8. EQUIPAMENTO
+// 9. EQUIPAMENTO
 type Equipamento struct {
 	IDEquip   uint     `gorm:"primaryKey;column:id_equip"`
 	Nome      *string  `gorm:"type:varchar(100)"`
@@ -120,7 +149,7 @@ type Equipamento struct {
 	Empresa   *Empresa `gorm:"foreignKey:EmpresaID"`
 }
 
-// 9. EVENTO
+// 10. EVENTO
 type Evento struct {
 	ID         uint       `gorm:"primaryKey"` // O GORM precisa de uma PK numérica interna idealmente
 	IDEvento   string     `gorm:"type:varchar(15);column:id_evento;not null"`
@@ -135,7 +164,7 @@ type Evento struct {
 	Empresa    *Empresa   `gorm:"foreignKey:EmpresaID"`
 }
 
-// 10. USUÁRIO
+// 11. USUÁRIO
 type Usuario struct {
 	IDUser    string   `gorm:"primaryKey;type:varchar(10);column:id_user"`
 	Nome      string   `gorm:"type:varchar(100);not null"`
@@ -147,7 +176,7 @@ type Usuario struct {
 	Empresa   *Empresa `gorm:"foreignKey:EmpresaID"`
 }
 
-// 11. PARAMETRO
+// 12. PARAMETRO
 type Parametro struct {
 	ID             uint     `gorm:"primaryKey"`
 	IDParam        string   `gorm:"type:varchar(15);column:id_param;not null"`
