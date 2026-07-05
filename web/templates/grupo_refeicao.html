@@ -1,0 +1,195 @@
+<!-- web/templates/grupo_refeicao.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
+    <title>Grupos de Refeição</title>
+    <style>
+        body { background-color: #f5f5f5; color: #000; font-family: Arial, sans-serif; }
+        .navbar { background-color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .navbar .nav-link, .navbar .navbar-brand { color: #000; }
+        .card { border: 1px solid #000; border-radius: 1rem; padding: 2rem; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h1, h4 { font-weight: 600; color: #000; }
+        .form-control { border: 1px solid #000; color: #000; background-color: #fff; }
+        .btn-clean { background-color: #fff; color: #000; border: 2px solid #000; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-clean:hover { background-color: #f0f0f0; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); color: #000; }
+        .table { border: 1px solid #000; }
+        .table th { background-color: #f0f0f0; color: #000; border-bottom: 2px solid #000; }
+        .checkbox-container { max-height: 200px; overflow-y: auto; border: 1px solid #000; border-radius: 6px; padding: 0.5rem; background: #fff; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-info-subtle" data-bs-theme="light">
+      <div class="container-fluid">
+        <a href="/">
+            <img src="/static/refeicao.png" alt="Logo" width="50" class="me-3 rounded-circle">
+        </a>
+        <span class="navbar-brand fw-bold">Módulo Refeitório</span>
+        <div class="collapse navbar-collapse" id="navbarColor01">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link fw-semibold" href="/">Home/Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link fw-semibold active" href="/grupo_refeicao">Grupos de Acesso</a></li>
+          </ul>
+          <a href="/logout" class="btn btn-sm btn-outline-dark">Sair</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row g-4">
+            
+            <!-- COLUNA DA ESQUERDA: FORMULÁRIO DE CADASTRO -->
+<div class="col-lg-4">
+    <div class="card">
+        <h4 class="mb-4 text-center" id="tituloFormulario">Novo Grupo</h4>
+        
+        {{if .IsErro}}
+        <div class="alert alert-danger border-1 text-center small mb-3" style="border-color: #000;">
+            ⚠️ {{.Mensagem}}
+        </div>
+        {{end}}
+
+        <!-- 1. ABERTURA DO FORMULÁRIO -->
+        <form action="/grupo_refeicao" method="POST" id="formGrupo">
+            <input type="hidden" name="acao" id="campoAcao" value="incluir">
+            <input type="hidden" name="id_grup" id="campoIdGrup" value="">
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Nome do Grupo</label>
+                <input class="form-control" required type="text" name="nome" id="inputNome" placeholder="Ex: Administrativo ou Fábrica">
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-bold">Refeições Permitidas para o Grupo</label>
+                <div class="checkbox-container">
+                    {{range .RefeicoesDispo}}
+                    <div class="form-check mb-2">
+                        <!-- O name="refeicoes" precisa estar idêntico -->
+                        <input class="form-check-input chk-refeicao" type="checkbox" name="refeicoes" value="{{.IDRef}}" id="ref_{{.IDRef}}">
+                        <label class="form-check-label small" for="ref_{{.IDRef}}">
+                            <strong>{{.Nome}}</strong> 
+                            <span class="text-muted">({{if .HoraInicio}}{{.HoraInicio}}{{else}}--:--{{end}} às {{if .HoraFim}}{{.HoraFim}}{{else}}--:--{{end}})</span>
+                        </label>
+                    </div>
+                    {{else}}
+                    <p class="text-muted small text-center my-2">Nenhuma refeição cadastrada para vincular.</p>
+                    {{end}}
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" id="btnSalvar" class="btn btn-clean w-100 py-2">Salvar</button>
+                <button type="button" id="btnCancelar" class="btn btn-outline-secondary w-100 py-2 d-none" onclick="cancelarEdicao()">Cancelar</button>
+            </div>
+        <!-- 2. FECHAMENTO DO FORMULÁRIO (Certifique-se de que ele está AQUI, após os botões e os checkboxes) -->
+        </form>
+    </div>
+</div>
+
+
+            <!-- COLUNA DA DIREITA: LISTAGEM DE GRUPOS -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <h4 class="mb-4">Grupos Configurados</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%;">ID</th>
+                                    <th style="width: 35%;">Nome do Grupo</th>
+                                    <th style="width: 40%;">Acessos Vinculados (Refeições)</th>
+                                    <th class="text-end" style="width: 15%;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .Grupos}}
+                                <tr>
+                                    <td class="fw-bold">#{{.IDGrup}}</td>
+                                    <!-- Lê a propriedade que é um ponteiro de string (*string) de forma direta -->
+                                    <td class="fw-semibold">{{if .Nome}}{{.Nome}}{{else}}Sem Nome{{end}}</td>
+                                    <td>
+                                        {{range .Refeicoes}}
+                                        <span class="badge bg-light text-dark border border-dark mb-1">{{.Nome}}</span>
+                                        {{else}}
+                                        <span class="badge bg-danger opacity-75">Nenhum acesso permitido</span>
+                                        {{end}}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <!-- Botão Editar: Monta uma lista dos IDs de refeições associadas para o JavaScript marcar na esquerda -->
+                                            <button class="btn btn-sm btn-outline-dark" 
+                                                    onclick="prepararEdicao('{{.IDGrup}}', '{{if .Nome}}{{.Nome}}{{end}}', [{{range .Refeicoes}}{{.IDRef}},{{end}}])">
+                                                Editar
+                                            </button>
+                                            
+                                            <!-- Formulário seguro para exclusão -->
+                                            <form action="/grupo_refeicao" method="POST" onsubmit="return confirm('Deseja realmente excluir este grupo? As amarrações com funcionários serão afetadas.')">
+                                                <input type="hidden" name="acao" value="excluir">
+                                                <input type="hidden" name="id_grup" value="{{.IDGrup}}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{else}}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">Nenhum grupo de refeição cadastrado.</td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript para gerenciar a marcação dinâmica dos checkboxes -->
+    <script>
+        function prepararEdicao(id, nome, idsRefeicoes) {
+            document.getElementById('campoAcao').value = 'alterar';
+            document.getElementById('campoIdGrup').value = id;
+            document.getElementById('inputNome').value = nome;
+            
+            // 1. Desmarca todos os checkboxes antes de aplicar os novos
+            const checkboxes = document.querySelectorAll('.chk-refeicao');
+            checkboxes.forEach(chk => chk.checked = false);
+            
+            // 2. Passa marcando os checkboxes que pertencem a este grupo clicado
+            if (idsRefeicoes && idsRefeicoes.length > 0) {
+                idsRefeicoes.forEach(idRef => {
+                    const chk = document.getElementById('ref_' + idRef);
+                    if (chk) chk.checked = true;
+                });
+            }
+            
+                        // Ajustes visuais do estado do formulário
+            document.getElementById('tituloFormulario').innerText = 'Alterar Grupo';
+            document.getElementById('btnSalvar').innerText = 'Atualizar Grupo';
+            document.getElementById('btnCancelar').classList.remove('d-none');
+            
+            document.getElementById('formGrupo').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelarEdicao() {
+            document.getElementById('campoAcao').value = 'incluir';
+            document.getElementById('campoIdGrup').value = '';
+            document.getElementById('formGrupo').reset();
+            
+            // Desmarca todas as caixas de seleção
+            const checkboxes = document.querySelectorAll('.chk-refeicao');
+            checkboxes.forEach(chk => chk.checked = false);
+            
+            document.getElementById('tituloFormulario').innerText = 'Novo Grupo';
+            document.getElementById('btnSalvar').innerText = 'Salvar';
+            document.getElementById('btnCancelar').classList.add('d-none');
+        }
+    </script>
+</body>
+</html>
+

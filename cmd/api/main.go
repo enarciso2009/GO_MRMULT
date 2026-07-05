@@ -45,6 +45,8 @@ func main() {
 	refeicaoService := services.NewRefeicaoService()
 	refeicaoHandler := handlers.NewRefeicaoHandler(refeicaoService)
 	sobreHandler := handlers.NewSobreHandler()
+	grupoRefeicaoService := services.NewGrupoRefeicaoService()
+	grupoRefeicaoHandler := handlers.NewGrupoRefeicaoHandler(grupoRefeicaoService, refeicaoService)
 
 	// Rotas
 
@@ -62,6 +64,8 @@ func main() {
 	roteador.HandleFunc("GET /acesso_negado", authHandler.ExibirAcessoNegado)
 	roteador.HandleFunc("GET /logout", authHandler.Logout)
 	roteador.HandleFunc("GET /sobre", sobreHandler.ExibirSobre)
+	roteador.HandleFunc("GET /grupo_refeicao", grupoRefeicaoHandler.GerenciarGrupo)
+	roteador.HandleFunc("POST /grupo_refeicao", grupoRefeicaoHandler.GerenciarGrupo)
 
 	// 4. ROTA PROTEGIDA (O Middleware vai inspecionar o acesso antes de liberar)
 	// Repare o homeHandler.ExibirHome envelopado pelo RequererAutenticacao
