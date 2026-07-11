@@ -165,6 +165,20 @@ type Terceiro struct {
 	Equipamentos    []Equipamento `gorm:"many2many:Terceiro_equipamento;joinForeignKey:terceiros_id;joinReferences:id_equip"`
 }
 
+func (t Terceiro) FormatarDataInicio() string {
+	if t.DataInicio == nil {
+		return "--"
+	}
+	return t.DataInicio.Format("02/01/2006")
+}
+
+func (t Terceiro) FormatarDataFim() string {
+	if t.DataFim == nil {
+		return "--"
+	}
+	return t.DataFim.Format("02/01/2006")
+}
+
 // 9. EQUIPAMENTO
 type Equipamento struct {
 	IDEquip   uint     `gorm:"primaryKey;column:id_equip"`

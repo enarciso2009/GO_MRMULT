@@ -62,11 +62,15 @@ func main() {
 
 	cadvisService := services.NewCadVisService()
 
+	cadterService := services.NewCadTerService()
+
 	// 2. Instancia os Handlers passando suas dependencias explicitas
 
 	cadfunHandler := handlers.NewCadFunHandler(cadfunService)
 
 	cadvisHandler := handlers.NewCadVisHandler(cadvisService)
+
+	cadterHandler := handlers.NewCadTerHandler(cadterService)
 
 	homeHandler := handlers.NewHomeHandler()
 
@@ -151,6 +155,9 @@ func main() {
 
 	roteador.HandleFunc("GET /cadvis", handlers.RequererAutenticacao(cadvisHandler.ExibirCadVis))
 	roteador.HandleFunc("POST /cadvis", handlers.RequererAutenticacao(cadvisHandler.ExibirCadVis))
+
+	roteador.HandleFunc("GET /cadter", handlers.RequererAutenticacao(cadterHandler.ExibirCadTer))
+	roteador.HandleFunc("POST /cadter", handlers.RequererAutenticacao(cadterHandler.ExibirCadTer))
 
 	fmt.Println("Servidor rodando com Dashboard em http://localhost:8080")
 	err = http.ListenAndServe(":8080", roteador)
