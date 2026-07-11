@@ -45,12 +45,6 @@ func main() {
 
 	// INSTANCIA OS CONTROLADORES
 
-	homeHandler := handlers.NewHomeHandler()
-
-	authHandler := handlers.NewAuthHandler()
-
-	equipamentoHandler := handlers.NewEquipamentoHandler()
-
 	// 1. Instancia os servicos necessario (camada de negocios)
 	refeicaoService := services.NewRefeicaoService()
 
@@ -64,7 +58,22 @@ func main() {
 
 	terceiroService := services.NewTerceiroService()
 
+	cadfunService := services.NewCadFunService()
+
+	cadvisService := services.NewCadVisService()
+
 	// 2. Instancia os Handlers passando suas dependencias explicitas
+
+	cadfunHandler := handlers.NewCadFunHandler(cadfunService)
+
+	cadvisHandler := handlers.NewCadVisHandler(cadvisService)
+
+	homeHandler := handlers.NewHomeHandler()
+
+	authHandler := handlers.NewAuthHandler()
+
+	equipamentoHandler := handlers.NewEquipamentoHandler()
+
 	refeicaoHandler := handlers.NewRefeicaoHandler(refeicaoService)
 
 	sobreHandler := handlers.NewSobreHandler()
@@ -108,12 +117,12 @@ func main() {
 	})
 
 	// Adicionamos o "GET" ou "POST" antes para o Go isolar os metodos (recurso do Go Moderno)
-
+	//login, logout e acesso negado
 	roteador.HandleFunc("GET /login", authHandler.ExibirLogin)
 	roteador.HandleFunc("POST /login", authHandler.Login)
-
-	roteador.HandleFunc("GET /acesso_negado", authHandler.ExibirAcessoNegado)
 	roteador.HandleFunc("GET /logout", authHandler.Logout)
+	roteador.HandleFunc("GET /acesso_negado", authHandler.ExibirAcessoNegado)
+	roteador.HandleFunc("POST /acesso_negado", authHandler.ExibirAcessoNegado)
 
 	roteador.HandleFunc("GET /sobre", sobreHandler.ExibirSobre)
 
@@ -128,14 +137,20 @@ func main() {
 	roteador.HandleFunc("GET /refeicao", handlers.RequererAutenticacao(refeicaoHandler.GerenciarRefeicao))
 	roteador.HandleFunc("POST /refeicao", handlers.RequererAutenticacao(refeicaoHandler.GerenciarRefeicao))
 
-	roteador.HandleFunc("POST /funcionario", funcionarioHandler.GerenciarFuncionario)
-	roteador.HandleFunc("GET /funcionario", funcionarioHandler.GerenciarFuncionario)
+	roteador.HandleFunc("POST /funcionario", handlers.RequererAutenticacao(funcionarioHandler.GerenciarFuncionario))
+	roteador.HandleFunc("GET /funcionario", handlers.RequererAutenticacao(funcionarioHandler.GerenciarFuncionario))
 
-	roteador.HandleFunc("POST /visitante", visitanteHandler.GerenciarVisitante)
-	roteador.HandleFunc("GET /visitante", visitanteHandler.GerenciarVisitante)
+	roteador.HandleFunc("POST /visitante", handlers.RequererAutenticacao(visitanteHandler.GerenciarVisitante))
+	roteador.HandleFunc("GET /visitante", handlers.RequererAutenticacao(visitanteHandler.GerenciarVisitante))
 
-	roteador.HandleFunc("POST /terceiro", terceiroHandler.GerenciarTerceiro)
-	roteador.HandleFunc("GET /terceiro", terceiroHandler.GerenciarTerceiro)
+	roteador.HandleFunc("POST /terceiro", handlers.RequererAutenticacao(terceiroHandler.GerenciarTerceiro))
+	roteador.HandleFunc("GET /terceiro", handlers.RequererAutenticacao(terceiroHandler.GerenciarTerceiro))
+
+	roteador.HandleFunc("GET /cadfun", handlers.RequererAutenticacao(cadfunHandler.ExibirCadFun))
+	roteador.HandleFunc("POST /cadfun", handlers.RequererAutenticacao(cadfunHandler.ExibirCadFun))
+
+	roteador.HandleFunc("GET /cadvis", handlers.RequererAutenticacao(cadvisHandler.ExibirCadVis))
+	roteador.HandleFunc("POST /cadvis", handlers.RequererAutenticacao(cadvisHandler.ExibirCadVis))
 
 	fmt.Println("Servidor rodando com Dashboard em http://localhost:8080")
 	err = http.ListenAndServe(":8080", roteador)

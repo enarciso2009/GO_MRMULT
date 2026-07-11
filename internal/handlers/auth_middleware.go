@@ -31,7 +31,7 @@ func RequererAutenticacao(proximoHandler http.HandlerFunc) http.HandlerFunc {
 		// 4. Se o Token estiver quebrado, vencido ou com erro de leitura
 		if err != nil || !token.Valid {
 			// Redireciona o usuario para a tela de Acesso Negado
-			http.Redirect(w, r, "/acesso-negado", http.StatusSeeOther)
+			http.Redirect(w, r, "/acesso_negado", http.StatusSeeOther)
 			return
 		}
 

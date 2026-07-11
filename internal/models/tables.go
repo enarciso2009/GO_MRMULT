@@ -98,6 +98,13 @@ type Funcionario struct {
 	Equipamentos    []Equipamento `gorm:"many2many:Funcionario_equipamento;joinForeignKey:funcionarios_id;joinReferences:id_equip"`
 }
 
+func (f Funcionario) FormatarAdmissao() string {
+	if f.Admissao == nil {
+		return "--"
+	}
+	return f.Admissao.Format("02/01/2006")
+}
+
 // 7. VISITANTE
 type Visitante struct {
 	ID              uint          `gorm:"primaryKey"`
@@ -118,6 +125,22 @@ type Visitante struct {
 	EmpresaID       *uint         `gorm:"column:empresa_id"`
 	Empresa         *Empresa      `gorm:"foreignKey:EmpresaID"`
 	Equipamentos    []Equipamento `gorm:"many2many:Visitante_equipamento;joinForeignKey:visitantes_id;joinReferences:id_equip"`
+}
+
+// FormatarAdmissao verifica se o ponteiro não é nulo e formata a data para DD/MM/AAAA
+func (v Visitante) FormatarDataInicio() string {
+	if v.DataInicio == nil {
+		return "--"
+	}
+	// O Go usa uma data de referência específica para formatação: 02/01/2006
+	return v.DataInicio.Format("02/01/2006")
+}
+
+func (v Visitante) FormatarDataFim() string {
+	if v.DataFim == nil {
+		return "--"
+	}
+	return v.DataFim.Format("02/01/2006")
 }
 
 // 8. TERCEIRO
