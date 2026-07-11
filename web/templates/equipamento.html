@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css"> 
    
     <title>Gerenciamento de Equipamentos</title>
     <style>
@@ -105,16 +107,19 @@
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
                                             <!-- Botão Alterar: Chama uma função Javascript para preencher o formulário da esquerda -->
-                                            <button class="btn btn-sm btn-outline-dark" 
-                                                    onclick="prepararEdicao('{{.IDEquip}}', '{{.Nome}}', '{{.IP}}', '{{.Mask}}')">
-                                                Editar
+                                            <button class="btn btn-editar"
+                                                title="Editar Equipamento" style="padding: 6px 10px; background-color: #beec82;" 
+                                                onclick="prepararEdicao('{{.IDEquip}}', '{{.Nome}}', '{{.IP}}', '{{.Mask}}')">
+                                                <i class="fa-solid fa-pen"></i>
                                             </button>
                                             
                                             <!-- Formulário invisível individual para disparar a exclusão via POST igual à lógica do seu Django -->
                                             <form action="/equipamento" method="POST" onsubmit="return confirm('Deseja realmente excluir este equipamento?')">
                                                 <input type="hidden" name="acao" value="excluir">
                                                 <input type="hidden" name="id_equip" value="{{.IDEquip}}">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>
+                                                <button type="submit" class="btn btn-excluir" title="Excluir Refeicao" style="padding: 6px 10px; background-color: #ec6d6d;">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
                                             </form>
                                         </div>
                                     </td>

@@ -95,6 +95,7 @@ type Funcionario struct {
 	Ativo           *string       `gorm:"type:varchar(50)"`
 	EmpresaID       *uint         `gorm:"column:empresa_id"`
 	Empresa         *Empresa      `gorm:"foreignKey:EmpresaID"`
+	Equipamentos    []Equipamento `gorm:"many2many:Funcionario_equipamento;joinForeignKey:funcionarios_id;joinReferences:id_equip"`
 }
 
 // 7. VISITANTE
@@ -109,13 +110,14 @@ type Visitante struct {
 	GrupoRefeicaoID uint          `gorm:"column:grup_ref_id;not null"`
 	GrupoRefeicao   GrupoRefeicao `gorm:"foreignKey:GrupoRefeicaoID"`
 	DataInicio      *time.Time    `gorm:"type:date"`
-	HoraInicio      *string       `gorm:"type:time"`
+	HoraInicio      *string       `gorm:"type:time without time zone;column:hora_inicio"`
 	DataFim         *time.Time    `gorm:"type:date"`
-	HoraFim         *string       `gorm:"type:time"`
+	HoraFim         *string       `gorm:"type:time without time zone;column:hora_fim"`
 	Motivo          *string       `gorm:"type:varchar(50)"`
 	TipoPessoa      int           `gorm:"default:2;not null"`
 	EmpresaID       *uint         `gorm:"column:empresa_id"`
 	Empresa         *Empresa      `gorm:"foreignKey:EmpresaID"`
+	Equipamentos    []Equipamento `gorm:"many2many:Visitante_equipamento;joinForeignKey:visitantes_id;joinReferences:id_equip"`
 }
 
 // 8. TERCEIRO
@@ -131,12 +133,13 @@ type Terceiro struct {
 	GrupoRefeicaoID uint          `gorm:"column:grup_ref_id;not null"`
 	GrupoRefeicao   GrupoRefeicao `gorm:"foreignKey:GrupoRefeicaoID"`
 	DataInicio      *time.Time    `gorm:"type:date"`
-	HoraInicio      *string       `gorm:"type:time"`
+	HoraInicio      *string       `gorm:"type:time without time zone;column:hora_inicio"`
 	DataFim         *time.Time    `gorm:"type:date"`
-	HoraFim         *string       `gorm:"type:time"`
+	HoraFim         *string       `gorm:"type:time without time zone;column:hora_fim"`
 	TipoPessoa      int           `gorm:"default:3;not null"`
 	EmpresaID       *uint         `gorm:"column:empresa_id"`
 	Empresa         *Empresa      `gorm:"foreignKey:EmpresaID"`
+	Equipamentos    []Equipamento `gorm:"many2many:Terceiro_equipamento;joinForeignKey:terceiros_id;joinReferences:id_equip"`
 }
 
 // 9. EQUIPAMENTO

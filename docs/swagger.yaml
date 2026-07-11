@@ -1,0 +1,303 @@
+basePath: /
+definitions:
+  handlers.RespostaPadrao:
+    properties:
+      id:
+        type: integer
+      mensagem:
+        type: string
+      sucesso:
+        type: boolean
+    type: object
+  models.Empresa:
+    properties:
+      cnpj:
+        type: string
+      id:
+        type: integer
+      nome:
+        type: string
+    type: object
+  models.Equipamento:
+    properties:
+      empresa:
+        $ref: '#/definitions/models.Empresa'
+      empresaID:
+        type: integer
+      idequip:
+        type: integer
+      ip:
+        type: string
+      mask:
+        type: string
+      nome:
+        type: string
+    type: object
+  models.Funcionario:
+    properties:
+      admissao:
+        type: string
+      ativo:
+        type: string
+      cargo:
+        type: string
+      centroDeCusto:
+        type: string
+      credencial:
+        type: string
+      departamento:
+        type: string
+      documento:
+        type: string
+      empresa:
+        $ref: '#/definitions/models.Empresa'
+      empresaID:
+        type: integer
+      equipamentos:
+        items:
+          $ref: '#/definitions/models.Equipamento'
+        type: array
+      grupoRefeicao:
+        $ref: '#/definitions/models.GrupoRefeicao'
+      grupoRefeicaoID:
+        type: integer
+      id:
+        type: integer
+      matricula:
+        type: string
+      nome:
+        type: string
+      tipoPessoa:
+        type: integer
+    type: object
+  models.GrupoRefeicao:
+    properties:
+      empresa:
+        $ref: '#/definitions/models.Empresa'
+      empresaID:
+        type: integer
+      idgrup:
+        type: integer
+      nome:
+        type: string
+      refeicoes:
+        items:
+          $ref: '#/definitions/models.Refeicao'
+        type: array
+    type: object
+  models.PrecoRefeicao:
+    properties:
+      dataFim:
+        description: NULL = Valor ativo atual
+        type: string
+      dataInicio:
+        type: string
+      idpreco:
+        type: integer
+      refeicaoID:
+        type: integer
+      valor:
+        type: number
+    type: object
+  models.Refeicao:
+    properties:
+      empresa:
+        $ref: '#/definitions/models.Empresa'
+      empresaID:
+        type: integer
+      historicoPrecos:
+        description: Relacionamento com o historico de valores comerciais
+        items:
+          $ref: '#/definitions/models.PrecoRefeicao'
+        type: array
+      horaFim:
+        type: string
+      horaInicio:
+        type: string
+      idref:
+        type: integer
+      nome:
+        type: string
+    type: object
+  models.Terceiro:
+    properties:
+      credencial:
+        type: string
+      dataFim:
+        type: string
+      dataInicio:
+        type: string
+      documento:
+        type: string
+      empTer:
+        type: string
+      empresa:
+        $ref: '#/definitions/models.Empresa'
+      empresaID:
+        type: integer
+      equipamentos:
+        items:
+          $ref: '#/definitions/models.Equipamento'
+        type: array
+      funcionario:
+        $ref: '#/definitions/models.Funcionario'
+      funcionarioID:
+        type: integer
+      grupoRefeicao:
+        $ref: '#/definitions/models.GrupoRefeicao'
+      grupoRefeicaoID:
+        type: integer
+      horaFim:
+        type: string
+      horaInicio:
+        type: string
+      id:
+        type: integer
+      matricula:
+        type: string
+      nome:
+        type: string
+      tipoPessoa:
+        type: integer
+    type: object
+  models.Visitante:
+    properties:
+      credencial:
+        type: string
+      dataFim:
+        type: string
+      dataInicio:
+        type: string
+      documento:
+        type: string
+      empresa:
+        $ref: '#/definitions/models.Empresa'
+      empresaID:
+        type: integer
+      equipamentos:
+        items:
+          $ref: '#/definitions/models.Equipamento'
+        type: array
+      funcionario:
+        $ref: '#/definitions/models.Funcionario'
+      funcionarioID:
+        type: integer
+      grupoRefeicao:
+        $ref: '#/definitions/models.GrupoRefeicao'
+      grupoRefeicaoID:
+        type: integer
+      horaFim:
+        type: string
+      horaInicio:
+        type: string
+      id:
+        type: integer
+      matricula:
+        type: string
+      motivo:
+        type: string
+      nome:
+        type: string
+      tipoPessoa:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: API para sincronismo de dados entre o Controle de Acesso e o Refeitório.
+  title: API de Integração - Módulo Refeitório
+  version: "1.0"
+paths:
+  /api/integracao/funcionario:
+    post:
+      consumes:
+      - application/json
+      description: Recebe os dados cadastrais de um funcionário vindo do controle
+        de acesso e grava no refeitório
+      parameters:
+      - description: Dados do Funcionário
+        in: body
+        name: funcionario
+        required: true
+        schema:
+          $ref: '#/definitions/models.Funcionario'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.RespostaPadrao'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.RespostaPadrao'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.RespostaPadrao'
+      summary: Integrar Funcionário
+      tags:
+      - Integração
+  /api/integracao/terceiro:
+    post:
+      consumes:
+      - application/json
+      description: Recebe os dados de um terceiro vindo do controle de acesso e grava
+        no refeitório
+      parameters:
+      - description: Dados do Terceiro
+        in: body
+        name: terceiro
+        required: true
+        schema:
+          $ref: '#/definitions/models.Terceiro'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.RespostaPadrao'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.RespostaPadrao'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.RespostaPadrao'
+      summary: Integrar Terceiro
+      tags:
+      - Integração
+  /api/integracao/visitante:
+    post:
+      consumes:
+      - application/json
+      description: Recebe os dados de um visitante vindo do controle de acesso e grava
+        no refeitório
+      parameters:
+      - description: Dados do Visitante
+        in: body
+        name: visitante
+        required: true
+        schema:
+          $ref: '#/definitions/models.Visitante'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.RespostaPadrao'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.RespostaPadrao'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.RespostaPadrao'
+      summary: Integrar Visitante
+      tags:
+      - Integração
+swagger: "2.0"

@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css"> 
     <title>Gerenciamento de Refeições</title>
     <style>
         body { background-color: #f5f5f5; color: #000; font-family: Arial, sans-serif; }
@@ -120,16 +122,19 @@
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
                                             <!-- Botão Editar: Atualiza os campos enviando o valor histórico atual -->
-                                            <button class="btn btn-sm btn-outline-dark" 
-                                                    onclick="prepararEdicao('{{.IDRef}}', '{{.Nome}}', '{{.ObterPrecoAtual}}', '{{if .HoraInicio}}{{.HoraInicio}}{{end}}', '{{if .HoraFim}}{{.HoraFim}}{{end}}')">
-                                                Editar
+                                            <button class="btn btn-editar"
+                                                title="Editar Refecicao" style="padding: 6px 10px; background-color: #beec82;" 
+                                                onclick="prepararEdicao('{{.IDRef}}', '{{.Nome}}', '{{.ObterPrecoAtual}}', '{{if .HoraInicio}}{{.HoraInicio}}{{end}}', '{{if .HoraFim}}{{.HoraFim}}{{end}}')">
+                                                <i class="fa-solid fa-pen"></i>
                                             </button>
                                             
                                             <!-- Formulário seguro de exclusão em conformidade com as chaves estrangeiras -->
                                             <form action="/refeicao" method="POST" onsubmit="return confirm('Deseja realmente excluir esta refeição?')">
                                                 <input type="hidden" name="acao" value="excluir">
                                                 <input type="hidden" name="id_ref" value="{{.IDRef}}">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>
+                                                <button type="submit" class="btn btn-excluir" title="Excluir Refeicao" style="padding: 6px 10px; background-color: #ec6d6d;">
+                                                    <i class="fa-solid fa-trash"></i>    
+                                                </button>
                                             </form>
                                         </div>
                                     </td>

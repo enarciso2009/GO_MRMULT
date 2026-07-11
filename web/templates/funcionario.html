@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
+    <!--<link rel="stylesheet" type="text/css" href="/static/bootstrap-icons.min.css"> --> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css"> 
+    <title>Gerenciamento de Funcionários</title>
+    <style>
+        body { background-color: #f5f5f5; color: #000; font-family: Arial, sans-serif; }
+        .navbar { background-color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .navbar .nav-link, .navbar .navbar-brand { color: #000; }
+        .card { border: 1px solid #000; border-radius: 1rem; padding: 2rem; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h1, h4 { font-weight: 600; color: #000; }
+        .form-control, .form-select { border: 1px solid #000; color: #000; background-color: #fff; }
+        .form-control:focus, .form-select:focus { border-color: #000; box-shadow: none; background-color: #fff; color: #000; }
+        .btn-clean { background-color: #fff; color: #000; border: 2px solid #000; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-clean:hover { background-color: #f0f0f0; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); color: #000; }
+        .table { border: 1px solid #000; }
+        .table th { background-color: #f0f0f0; color: #000; border-bottom: 2px solid #000; }
+       
+    
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-info-subtle" data-bs-theme="light">
+      <div class="container-fluid">
+        <a href="/">
+            <img src="/static/refeicao.png" alt="Logo" width="50" class="me-3 rounded-circle">
+        </a>
+        <span class="navbar-brand fw-bold">Módulo Refeitório</span>
+        <div class="collapse navbar-collapse" id="navbarColor01">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link fw-semibold" href="/">Home/Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link fw-semibold active" href="/funcionario">Funcionários</a></li>
+          </ul>
+          <a href="/logout" class="btn btn-sm btn-outline-dark">Sair</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid my-5 px-4">
+        <div class="row g-4">
+            
+            <!-- COLUNA DA ESQUERDA: FORMULÁRIO DE CADASTRO -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <h4 class="mb-4 text-center" id="tituloFormulario">Novo Funcionário</h4>
+                    
+                    {{if .IsErro}}
+                    <div class="alert alert-danger border-1 text-center small mb-3" style="border-color: #000;">
+                        ⚠️ {{.Mensagem}}
+                    </div>
+                    {{end}}
+
+                    <form action="/funcionario" method="POST" id="formFuncionario">
+                        <input type="hidden" name="acao" id="campoAcao" value="incluir">
+                        <input type="hidden" name="id_fun" id="campoIdFun" value="">
+
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label small fw-bold">Matrícula</label>
+                                <input class="form-control" required type="text" name="matricula" id="inputMatricula">
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label small fw-bold">Admissão</label>
+                                <input class="form-control" type="date" name="admissao" id="inputAdmissao">
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Nome Completo</label>
+                            <input class="form-control" required type="text" name="nome" id="inputNome">
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label small fw-bold">Cargo</label>
+                                <input class="form-control" type="text" name="cargo" id="inputCargo">
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label small fw-bold">Departamento</label>
+                                <input class="form-control" type="text" name="departamento" id="inputDepartamento">
+                            </div>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label small fw-bold">Centro de Custo</label>
+                                <input class="form-control" type="text" name="centrodecusto" id="inputCentroCusto">
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label small fw-bold">Documento (CPF)</label>
+                                <input class="form-control" type="text" name="documento" id="inputDocumento">
+                            </div>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label small fw-bold">Credencial/Crachá</label>
+                                <input class="form-control" type="text" name="credencial" id="inputCredencial">
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label small fw-bold">Status</label>
+                                <select class="form-select" name="ativo" id="inputAtivo">
+                                    <option value="Sim">Ativo</option>
+                                    <option value="Não">Inativo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Grupo de Refeição (Obrigatório)</label>
+                            <select class="form-select" name="grup_ref_id" id="inputGrupoRef" required>
+                                <option value="">-- Selecione o Grupo --</option>
+                                {{range .GruposDispo}}
+                                <option value="{{.IDGrup}}">{{if .Nome}}{{.Nome}}{{end}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Equipamentos Vinculados (Selecione ao menos um)</label>
+                            <div class="checkbox-container">
+                                {{range.EquipamentosDispo}}
+                                <div class="form-check mb-2">
+                                    <!-- Usamos name "equipamentos" para enviar um array ao Go -->
+                                     <input class="form-check-input chk-equipamento" type="checkbox" name="equipamentos" value="{{.IDEquip}}" id="equip_{{.IDEquip}}">
+                                     <label class="form-check-label small" for="equip_{{.IDEquip}}">
+                                        <strong>{{if .Nome}}{{end}}</strong>
+                                        <span class="text-muted">{{if .Nome}}{{.Nome}}{{end}}</span>
+                                     </label>        
+                                </div>
+                                {{else}}
+                                <p class="text-muted small text-center my-2">Nenhum equipamento cadastrado para vincular.</p>
+                                {{end}}
+                            </div>    
+                        </div>
+
+                        <!-- Vinculação Oculta de Empresa -->
+                        <input type="hidden" name="empresa_id" value="1">
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" id="btnSalvar" class="btn btn-clean w-100 py-2">Salvar</button>
+                            <button type="button" id="btnCancelar" class="btn btn-outline-secondary w-100 py-2 d-none" onclick="cancelarEdicao()">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+                        <!-- COLUNA DA DIREITA: LISTAGEM DE FUNCIONÁRIOS -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <h4 class="mb-4">Funcionários Cadastrados</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead>
+                                <tr>
+                                    <th>Matrícula</th>
+                                    <th>Nome</th>
+                                    <th>Cargo/Setor</th>
+                                    <th>Grupo Acesso</th>
+                                    <th>Equipamentos</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .Funcionarios}}
+                                <tr>
+                                    <td class="fw-bold">#{{.Matricula}}</td>
+                                    <td class="fw-semibold">{{if .Nome}}{{.Nome}}{{else}}--{{end}}</td>
+                                    <td>
+                                        <div>{{if .Cargo}}{{.Cargo}}{{else}}--{{end}}</div>
+                                        <small class="text-muted">{{if .Departamento}}{{.Departamento}}{{else}}--{{end}}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border border-dark">{{if .GrupoRefeicao.Nome}}{{.GrupoRefeicao.Nome}}{{else}}Sem Grupo{{end}}</span>
+                                    </td>
+                                    <td>
+                                        {{range .Equipamentos}}
+                                        <span class="badge bg-info text-dark mb-1 d-block text-start">{{if .Nome}}{{.Nome}}{{end}}</span>
+                                        {{else}}
+                                        <span class="text-muted small">Nenhum item</span>
+                                        {{end}}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button class="btn btn-editar" 
+                                                    title="Editar Funcionario" style="padding:6px 10px; background-color: #beec82;"
+                                                    onclick="prepararEdicao('{{.ID}}', '{{.Matricula}}', '{{if .Nome}}{{.Nome}}{{end}}', '{{if .Cargo}}{{.Cargo}}{{end}}', '{{if .Departamento}}{{.Departamento}}{{end}}', '{{if .CentroDeCusto}}{{.CentroDeCusto}}{{end}}', '{{if .Documento}}{{.Documento}}{{end}}', '{{if .Credencial}}{{.Credencial}}{{end}}', '{{.GrupoRefeicaoID}}', '{{if .Ativo}}{{.Ativo}}{{end}}')">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            
+                                            <form action="/funcionario" method="POST" onsubmit="return confirm('Deseja realmente excluir?')">
+                                                <input type="hidden" name="acao" value="excluir">
+                                                <input type="hidden" name="id_fun" value="{{.ID}}">
+                                                <button type="submit" class="btn btn-excluir" title="Excluir funcionario" style="padding:6px 10px; background-color: #ec6d6d;">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{else}}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">Nenhum funcionário localizado no banco de dados.</td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function prepararEdicao(id, matricula, nome, cargo, depto, cc, doc, cred, grupoId, ativo) {
+            document.getElementById('tituloFormulario').innerText = "Alterar Funcionário";
+            document.getElementById('btnSalvar').innerText = "Atualizar";
+            document.getElementById('campoAcao').value = "alterar";
+            document.getElementById('campoIdFun').value = id;
+            
+            document.getElementById('inputMatricula').value = matricula;
+            document.getElementById('inputNome').value = nome;
+            document.getElementById('inputCargo').value = cargo;
+            document.getElementById('inputDepartamento').value = depto;
+            document.getElementById('inputCentroCusto').value = cc;
+            document.getElementById('inputDocumento').value = doc;
+            document.getElementById('inputCredencial').value = cred;
+            document.getElementById('inputGrupoRef').value = grupoId;
+            document.getElementById('inputAtivo').value = ativo || "Sim";
+            
+            // Oculta o select de equipamento inicial na edição para evitar conflitos de re-vínculo
+            document.getElementById('inputEquipamento').parentElement.classList.add('d-none');
+            
+            document.getElementById('btnCancelar').classList.remove('d-none');
+            document.getElementById('formFuncionario').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelarEdicao() {
+            document.getElementById('tituloFormulario').innerText = "Novo Funcionário";
+            document.getElementById('btnSalvar').innerText = 'Salvar';
+            document.getElementById('campoAcao').value = "incluir";
+            document.getElementById('campoIdFun').value = "";
+            document.getElementById('formFuncionario').reset();
+            
+            document.getElementById('inputEquipamento').parentElement.remove('d-none');
+            document.getElementById('btnCancelar').classList.add('d-none');
+        }
+    </script>
+</body>
+</html>
