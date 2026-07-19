@@ -7,12 +7,17 @@ import (
 // 1. EMPRESA
 
 type Empresa struct {
-	ID   uint   `gorm:"primaryKey"`
-	Nome string `gorm:"type:varchar(100); not null"`
-	CNPJ string `gorm:"type:varchar(18);unique;not null"`
+	ID        uint   `gorm:"primaryKey"`
+	Nome      string `gorm:"type:varchar(100); not null"`
+	CNPJ      string `gorm:"type:varchar(18);unique;not null"`
+	Endereco  string `gorm:"type:varchar(100)"`
+	Cep       string `gorm:"type:varchar(9)"`
+	Bairro    string `gorm:"type:varchar(100)"`
+	Municipio string `gorm:"type:varchar(100)"`
+	Estado    string `gorm:"type:varchar(2)"`
 }
 
-// 2. GRUPO REFEICAOz
+// 2. GRUPO REFEICAO
 
 type GrupoRefeicao struct {
 	IDGrup    uint       `gorm:"primaryKey;column:id_grup"`
@@ -100,7 +105,7 @@ type Funcionario struct {
 
 func (f Funcionario) FormatarAdmissao() string {
 	if f.Admissao == nil {
-		return "--"
+		return "--/--/----"
 	}
 	return f.Admissao.Format("02/01/2006")
 }
@@ -130,7 +135,7 @@ type Visitante struct {
 // FormatarAdmissao verifica se o ponteiro não é nulo e formata a data para DD/MM/AAAA
 func (v Visitante) FormatarDataInicio() string {
 	if v.DataInicio == nil {
-		return "--"
+		return "--/--/----"
 	}
 	// O Go usa uma data de referência específica para formatação: 02/01/2006
 	return v.DataInicio.Format("02/01/2006")
@@ -138,7 +143,7 @@ func (v Visitante) FormatarDataInicio() string {
 
 func (v Visitante) FormatarDataFim() string {
 	if v.DataFim == nil {
-		return "--"
+		return "--/--/----"
 	}
 	return v.DataFim.Format("02/01/2006")
 }
@@ -167,14 +172,14 @@ type Terceiro struct {
 
 func (t Terceiro) FormatarDataInicio() string {
 	if t.DataInicio == nil {
-		return "--"
+		return "--/--/----"
 	}
 	return t.DataInicio.Format("02/01/2006")
 }
 
 func (t Terceiro) FormatarDataFim() string {
 	if t.DataFim == nil {
-		return "--"
+		return "--/--/----"
 	}
 	return t.DataFim.Format("02/01/2006")
 }
@@ -212,6 +217,7 @@ type Usuario struct {
 	Usuario   string   `gorm:"type:varchar(100);not null"`
 	Senha     string   `gorm:"type:varchar(100);not null"`
 	Permissao *string  `gorm:"type:varchar(50)"`
+	Ativo     *string  `gorm:"type:varchar(50)"`
 	EmpresaID *uint    `gorm:"column:empresa_id"`
 	Empresa   *Empresa `gorm:"foreignKey:EmpresaID"`
 }

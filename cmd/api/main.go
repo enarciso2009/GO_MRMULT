@@ -48,6 +48,10 @@ func main() {
 	// 1. Instancia os servicos necessario (camada de negocios)
 	refeicaoService := services.NewRefeicaoService()
 
+	usuarioService := services.NewUsuarioService()
+
+	empresaService := services.NewEmpresaService()
+
 	grupoRefeicaoService := services.NewGrupoRefeicaoService()
 
 	funcionarioService := services.NewFuncionarioService()
@@ -65,6 +69,10 @@ func main() {
 	cadterService := services.NewCadTerService()
 
 	// 2. Instancia os Handlers passando suas dependencias explicitas
+
+	empresaHandler := handlers.NewEmpresaHandler(empresaService)
+
+	usuarioHandler := handlers.NewUsuarioHandler(usuarioService)
 
 	cadfunHandler := handlers.NewCadFunHandler(cadfunService)
 
@@ -130,8 +138,7 @@ func main() {
 
 	roteador.HandleFunc("GET /sobre", sobreHandler.ExibirSobre)
 
-	roteador.HandleFunc("GET /grupo_refeicao", grupoRefeicaoHandler.GerenciarGrupo)
-	roteador.HandleFunc("POST /grupo_refeicao", grupoRefeicaoHandler.GerenciarGrupo)
+	// paginas que precisam de autenticação do usuario sem autenticação não entra nas paginas
 
 	roteador.HandleFunc("GET /{$}", handlers.RequererAutenticacao(homeHandler.ExibirHome))
 
@@ -140,6 +147,9 @@ func main() {
 
 	roteador.HandleFunc("GET /refeicao", handlers.RequererAutenticacao(refeicaoHandler.GerenciarRefeicao))
 	roteador.HandleFunc("POST /refeicao", handlers.RequererAutenticacao(refeicaoHandler.GerenciarRefeicao))
+
+	roteador.HandleFunc("POST /usuario", handlers.RequererAutenticacao(usuarioHandler.GerenciarUsuario))
+	roteador.HandleFunc("GET /usuario", handlers.RequererAutenticacao(usuarioHandler.GerenciarUsuario))
 
 	roteador.HandleFunc("POST /funcionario", handlers.RequererAutenticacao(funcionarioHandler.GerenciarFuncionario))
 	roteador.HandleFunc("GET /funcionario", handlers.RequererAutenticacao(funcionarioHandler.GerenciarFuncionario))
@@ -159,6 +169,13 @@ func main() {
 	roteador.HandleFunc("GET /cadter", handlers.RequererAutenticacao(cadterHandler.ExibirCadTer))
 	roteador.HandleFunc("POST /cadter", handlers.RequererAutenticacao(cadterHandler.ExibirCadTer))
 
+	roteador.HandleFunc("GET /grupo_refeicao", handlers.RequererAutenticacao(grupoRefeicaoHandler.GerenciarGrupo))
+	roteador.HandleFunc("POST /grupo_refeicao", handlers.RequererAutenticacao(grupoRefeicaoHandler.GerenciarGrupo))
+
+	roteador.HandleFunc("GET /empresa", handlers.RequererAutenticacao(empresaHandler.GerenciarEmpresa))
+	roteador.HandleFunc("POST /empresa", handlers.RequererAutenticacao(empresaHandler.GerenciarEmpresa))
+
+	// chamada para executar o sistema
 	fmt.Println("Servidor rodando com Dashboard em http://localhost:8080")
 	err = http.ListenAndServe(":8080", roteador)
 	if err != nil {

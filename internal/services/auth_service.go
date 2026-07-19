@@ -58,3 +58,29 @@ func (s *AuthService) RealizarLogin(login, senhaPura string) (string, error) {
 	return tokenString, err
 
 }
+
+// Autenticar verifica as credenciais do usuario no banco de dados
+
+func (s *AuthService) Autenticar(username, senha string) (*models.Usuario, error) {
+	db, err := database.Conectar()
+	if err != nil {
+		return nil, err
+	}
+
+	var usuario models.Usuario
+	// Busca o usuario pelo campo "Usuario" trazendo a empresa junto Preload
+	err = db.Model(&models.Usuario{}).Where("usuario = ?", username).First(&usuario).Error
+
+	if err != nil {
+		// Retorna um erro generico amigavel por questoes de seguranca
+		return nil, errors.New("Usuario ou senha invalidos")
+
+	}
+	// Como suas senhas agora usam Bcrypt, precisamos validar aqui tambem!
+	err = bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(senha))
+	if err != nil {
+		return nil, errors.New("usuario ou senha invalidos")
+	}
+	// retorna o ponteiro do usuario encontrado (com o campo Permissao populado)
+	return &usuario, nil
+}
