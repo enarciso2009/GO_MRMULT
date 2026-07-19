@@ -109,7 +109,7 @@ func (e *EmpresaHandler) GerenciarEmpresa(w http.ResponseWriter, r *http.Request
 
 	/* === MÉTODO GET === */
 
-	lista, err := e.service.Listar(&empresaLogadaID)
+	lista, err := e.service.Listar(nil)
 	if err != nil {
 		http.Error(w, "Erro ao buscar Empresas", http.StatusInternalServerError)
 		return
@@ -120,7 +120,7 @@ func (e *EmpresaHandler) GerenciarEmpresa(w http.ResponseWriter, r *http.Request
 // Função auxiliar para renderizar a pagina mostrando o erro
 
 func (e *EmpresaHandler) renderizarComErro(w http.ResponseWriter, msg string, empID *uint) {
-	lista, _ := e.service.Listar(empID)
+	lista, _ := e.service.Listar(nil)
 	tmplEmpresa.Execute(w, DadosTelaEmpresa{
 		Empresas: lista,
 		Mensagem: msg,
